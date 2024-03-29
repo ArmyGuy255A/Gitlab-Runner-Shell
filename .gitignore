@@ -1,0 +1,4 @@
+# Ignore everything in volumes directory
+volumes/*
+!volumes/.gitkeep
+.env

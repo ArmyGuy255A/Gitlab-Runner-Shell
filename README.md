@@ -10,22 +10,19 @@
 | LOCAL_CA_PATH | Path to the local CA certificates file | /usr/local/share/ca-certificates/ca.crt ||
 | GITLAB_URL | URL of the GitLab instance | https://10.10.10.10:8443 ||
 | GITLAB_REGISTRATION_TOKEN | Registration token for the GitLab Runner | GLh.....YZ ||
-| DEFAULT_IMAGE | Default Docker image for the GitLab Runner | gitlab/gitlab-runner-helper:ubuntu-x86_64-v14.10.2-pwsh ||
 | TAG_LIST | Comma-separated list of tags for the GitLab Runner | docker,gitlab,dind ||
 | SSH_PORT | Port number for SSH connections | 8443 ||
-| EXECUTOR | Executor type for the GitLab Runner | docker+machine | shell, ssh, parallels, docker-windows, instance, custom, virtualbox, docker, docker+machine, kubernetes, docker-autoscaler |
 
 # Running and Registering a GitLab Runner with this image
 
 The minimum required environment to run and register this runner is below:
 
 ```bash
-docker run -d --name gitlab-runner \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /etc/gitlab-runner:/etc/gitlab-runner \
+docker run -d --name gitlab-runner-shell \
+  -v /etc/gitlab-runner-shell:/etc/gitlab-runner \
   -e GITLAB_URL=https://10.10.10.10:8443 \
   -e GITLAB_REGISTRATION_TOKEN=GLh.....YZ \
-  armyguy255a/gitlab-runner:latest
+  armyguy255a/gitlab-runner-shell:latest
 ```
 
 You may need a .env file to store the environment variables when running docker compose. The file would look like this:

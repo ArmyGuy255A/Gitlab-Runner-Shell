@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# gitlab-runner data directory
+DATA_DIR="/etc/gitlab-runner"
+CONFIG_FILE=${CONFIG_FILE:-$DATA_DIR/config.toml}
+CA_CERTIFICATES_PATH=${CA_CERTIFICATES_PATH:-$DATA_DIR/certs/ca.crt}
+LOCAL_CA_PATH="/usr/local/share/ca-certificates/ca.crt"
+GITLAB_URL=$GITLAB_URL
+GITLAB_REGISTRATION_TOKEN=$GITLAB_REGISTRATION_TOKEN
+TAG_LIST=${TAG_LIST:-"shell,gitlab"}
+SSH_PORT=${SSH_PORT:-"8443"}
+
+update_ca() {
+  echo "Updating CA certificates..."
+  cp "${CA_CERTIFICATES_PATH}" "${LOCAL_CA_PATH}"
+  update-ca-certificates --fresh >/dev/null
+}
+
+if [ -f "${CA_CERTIFICATES_PATH}" ]; then
+  # update the ca if the custom ca is different than the current
+  cmp --silent "${CA_CERTIFICATES_PATH}" "${LOCAL_CA_PATH}" || update_ca
+fi
+
+cleanup() {
+  echo "Removing runner..."
+  
+  # Extracting the necessary fields from the config.toml file
+  CONFIG_FILE="/etc/gitlab-runner/config.toml"
+  URL=$(awk '/url =/ {print $3}' $CONFIG_FILE | tr -d '"')
+  TOKEN=$(awk '/token =/ {print $3}' $CONFIG_FILE | tr -d '"')
+  NAME=$(awk '/name =/ {print $3}' $CONFIG_FILE | tr -d '"')
+
+  # Unregister the runner
+  ./entrypoint unregister --name "$NAME" --url "$URL" --token "$TOKEN"
+}
+
+# Check if the runner is already registerd. If not, register it.
+if [ -f "$CONFIG_FILE" ]; then
+  echo "Runner already registered."
+  REGISTER_RUNNER=false
+else
+  echo "Runner not registered."
+  REGISTER_RUNNER=true
+fi
+
+# Register the runner if the URL and TOKEN are provided
+if $REGISTER_RUNNER && [ -n "$GITLAB_URL" ] && [ -n "$GITLAB_REGISTRATION_TOKEN" ]; then
+  echo "Registering runner..."
+  echo "Executor: $EXECUTOR"
+  gitlab-runner register --non-interactive \
+    --executor shell \
+    --registration-token "$GITLAB_REGISTRATION_TOKEN" \
+    --description "shell-runner" \
+    --tag-list "$TAG_LIST" \
+    --run-untagged="true" \
+    --locked="false" \
+    --url $GITLAB_URL \
+    --ssh-port "$SSH_PORT"
+fi
+
+trap cleanup INT TERM SIGTERM SIGQUIT
+# trap 'cleanup; exit 130' INT
+# trap 'cleanup; exit 143' TERM
+
+# launch gitlab-runner passing all arguments
+exec gitlab-runner "$@"
+
+cleanup
