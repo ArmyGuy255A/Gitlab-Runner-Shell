@@ -10,7 +10,7 @@
 | LOCAL_CA_PATH | Path to the local CA certificates file | /usr/local/share/ca-certificates/ca.crt ||
 | GITLAB_URL | URL of the GitLab instance | https://10.10.10.10:8443 ||
 | GITLAB_REGISTRATION_TOKEN | Registration token for the GitLab Runner | GLh.....YZ ||
-| TAG_LIST | Comma-separated list of tags for the GitLab Runner | docker,gitlab,dind ||
+| TAG_LIST | Comma-separated list of tags for the GitLab Runner | pwsh,bash,ubuntu ||
 | SSH_PORT | Port number for SSH connections | 8443 ||
 
 # Running and Registering a GitLab Runner with this image
