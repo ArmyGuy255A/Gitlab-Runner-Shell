@@ -3,7 +3,7 @@ FROM gitlab/gitlab-runner:ubuntu-v16.10.0
 LABEL Author="Phil Dieppa"
 LABEL Email="mrdieppa@gmail.com"
 LABEL GitHub="https://github.com/ArmyGuy255A"
-LABEL BaseImage="ubuntu:20.04"
+LABEL BaseImage="gitlab/gitlab-runner:ubuntu-v16.10.0"
 
 # Avoid prompts from apt
 ENV DEBIAN_FRONTEND=noninteractive
